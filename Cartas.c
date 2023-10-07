@@ -6,6 +6,7 @@
 #define Max_Cartas 60
 #define Num_Cartas_Iniciales 3
 #define Num_Cartas_A_Mostrar 15
+#define Num_Cartas_Monto 12
 
 struct Guardian {
     char nombre[50];
@@ -23,13 +24,16 @@ struct Carta {
 struct Jugador {
     int puntosVida;
     struct Carta mano[Num_Cartas_Iniciales];
+    struct Carta monton[Num_Cartas_Monto];
     int numCartasEnMano;
+    int numCartasEnMonton;
 };
 
 void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas);
 void mostrarMenu();
 void revolverCartas(struct Guardian cartas[], int numCartas);
 void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[], int numCartasEnLote);
+void mostrarCartas(struct Guardian lote[], int numCartasEnLote);
 
 int main() {
     struct Guardian cartas[Max_Cartas];
@@ -49,6 +53,7 @@ int main() {
                 struct Jugador jugador1;
                 struct Jugador jugador2;
                 seleccionarCartasIniciales(&jugador1, cartas, Num_Cartas_A_Mostrar);
+                printf("\n\nTurno del jugador 2\n");
                 seleccionarCartasIniciales(&jugador2, cartas, Num_Cartas_A_Mostrar);
                 break;
             case 2:
@@ -64,7 +69,7 @@ int main() {
 
     return 0;
 }
-
+//<------------------------------Funcion para cargar archivos---------------------->
 void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas) {
     FILE *archivo = fopen("Cartas.txt", "r");
     if (archivo == NULL) {
@@ -94,14 +99,14 @@ void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas) {
 
     fclose(archivo);
 }
-
+//<---------------------------------Fin de cargar archivo----------------------->
 void mostrarMenu() {
     printf("---- The Clash of the Guardians ----\n");
     printf("1. Comenzar juego\n");
     printf("2. Historial de la partida\n");
     printf("3. Salir\n");
 }
-
+//<--------------------------Funcion para revolver cartas--------------------------------->
 void revolverCartas(struct Guardian cartas[], int numCartas) {
     srand(time(NULL));
     printf("Se estan revolviendo las cartas....\n");
@@ -120,15 +125,15 @@ void revolverCartas(struct Guardian cartas[], int numCartas) {
         cartas[j] = temp;
     }
 }
+//<-----------------------Fin de la funcion revolver cartas---------------------------------->
 
+//<---------------------------Funcion para elegir las cartas-------------------->
 void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[], int numCartasEnLote) {
     jugador->numCartasEnMano = 0; // Inicializa la mano del jugador
+    jugador->numCartasEnMonton = 0; // Inicializa el montón del jugador
 
     printf("Selecciona tus 3 cartas iniciales:\n");
-
-    for (int i = 0; i < numCartasEnLote && jugador->numCartasEnMano < Num_Cartas_Iniciales; i++) {
-        printf("%d. %s (%s, PV:%d, PA:%d, PD:%d)\n", i + 1, lote[i].nombre, lote[i].tipo, lote[i].PV, lote[i].PA, lote[i].PD);
-    }
+    mostrarCartas(lote, numCartasEnLote);
 
     while (jugador->numCartasEnMano < Num_Cartas_Iniciales) {
         printf("Elige una carta (1-%d): ", numCartasEnLote);
@@ -136,11 +141,15 @@ void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[],
         scanf("%d", &eleccion);
 
         if (eleccion >= 1 && eleccion <= numCartasEnLote) {
-            // Agrega la carta seleccionada a la mano del jugador
-            jugador->mano[jugador->numCartasEnMano].guardian = lote[eleccion - 1];
+            // Crear una nueva carta y asignar la carta seleccionada a la mano del jugador
+            struct Carta nuevaCarta;
+            nuevaCarta.guardian = lote[eleccion - 1];
+            nuevaCarta.enCampoBatalla = 0;
+
+            jugador->mano[jugador->numCartasEnMano] = nuevaCarta;
             jugador->numCartasEnMano++;
 
-            // Elimina la carta seleccionada del lote
+            // Eliminar la carta seleccionada del lote
             for (int i = eleccion - 1; i < numCartasEnLote - 1; i++) {
                 lote[i] = lote[i + 1];
             }
@@ -153,11 +162,29 @@ void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[],
         }
     }
 
-    printf("\n\nTus cartas iniciales son:\n");
-    for (int i = 0; i < Num_Cartas_Iniciales; i++) {
-        printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador->mano[i].guardian.nombre, jugador->mano[i].guardian.tipo, jugador->mano[i].guardian.PV, jugador->mano[i].guardian.PA, jugador->mano[i].guardian.PD);
+    // Mover las cartas restantes al montón
+    for (int i = 0; i < numCartasEnLote; i++) {
+        struct Carta nuevaCartaEnMonton;
+        nuevaCartaEnMonton.guardian = lote[i];
+        nuevaCartaEnMonton.enCampoBatalla = 0;
+
+        jugador->monton[jugador->numCartasEnMonton] = nuevaCartaEnMonton;
+        jugador->numCartasEnMonton++;
+    }
+
+    printf("\nTus cartas iniciales son:\n");
+    mostrarCartas(jugador->mano, Num_Cartas_Iniciales);
+
+    printf("\nCartas restantes en tu montón:\n");
+    mostrarCartas(jugador->monton, jugador->numCartasEnMonton);
+}
+//<------------------------------------Fin de la funcion seleccionar cartas------------------------------------>
+void mostrarCartas(struct Guardian lote[], int numCartasEnLote) {
+    for (int i = 0; i < numCartasEnLote; i++) {
+        printf("%d. %s (%s, PV:%d, PA:%d, PD:%d)\n", i + 1, lote[i].nombre, lote[i].tipo, lote[i].PV, lote[i].PA, lote[i].PD);
     }
 }
+    
 
 
 
