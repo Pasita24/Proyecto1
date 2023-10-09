@@ -5,6 +5,7 @@
 #define Max_Cartas 60
 #define Num_Cartas_Iniciales 3
 #define Num_Cartas_A_Mostrar 15
+#define Num_Cartas_Restantes 12
 
 struct Guardian {
     char nombre[50];
@@ -23,6 +24,8 @@ struct Jugador {
     int puntosVida;
     struct Carta mano[Num_Cartas_Iniciales];
     int numCartasEnMano;
+    struct Guardian cartasRestantes[Num_Cartas_Restantes];
+    int numCartasRestantes;
 };
 
 void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas);
@@ -30,10 +33,11 @@ void mostrarMenu();
 void revolverCartas(struct Guardian cartas[], int numCartas);
 void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[], int *numCartasEnLote);
 
-int main() {
-    struct Guardian cartas[Max_Cartas];
-    int numCartas = 0;
+struct Guardian cartas[Max_Cartas];
+int numCartas = 0;
 
+int main() {
+    
     cargarCartasDesdeArchivo(cartas, &numCartas);
     revolverCartas(cartas, numCartas);
 
@@ -41,7 +45,7 @@ int main() {
     int numCartasRestantes = Num_Cartas_A_Mostrar;
     do {
         mostrarMenu();
-        printf("Selecciona una opcion: ");
+        printf("Selecciona una opcion: \n");
         scanf("%d", &opcion);
         switch (opcion) {
             case 1:
@@ -49,11 +53,16 @@ int main() {
                 struct Jugador jugador1;
                 struct Jugador jugador2;
 
+                // Copiar cartas al segundo jugador
+                struct Guardian cartasJugador2[Max_Cartas];
+                memcpy(cartasJugador2, cartas, sizeof(cartas));
+                revolverCartas(cartasJugador2, numCartas);
+
                 seleccionarCartasIniciales(&jugador1, cartas, &numCartasRestantes);
-               
-               /*printf("\n\nTurno del segundo jugador\n");
+                
+                printf("\n\nTurno del segundo jugador\n");
+                
                 seleccionarCartasIniciales(&jugador2, cartas, &numCartasRestantes);
-               */ 
                 break;
             case 2:
                 break;
@@ -161,3 +170,5 @@ void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[],
         printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador->mano[i].guardian.nombre, jugador->mano[i].guardian.tipo, jugador->mano[i].guardian.PV, jugador->mano[i].guardian.PA, jugador->mano[i].guardian.PD);
     }
 }
+
+
