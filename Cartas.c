@@ -56,23 +56,13 @@ int main() {
                 memcpy(mazoCompleto, cartas, sizeof(struct Guardian) * Max_Cartas);
                 revolverCartas(mazoCompleto, Max_Cartas);
 
-                // Crear mazo para el Jugador 1
-                struct Guardian mazoJugador1[Num_Cartas_A_Mostrar];
-                memcpy(mazoJugador1, mazoCompleto, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
-                revolverCartas(mazoJugador1, Num_Cartas_A_Mostrar);
-
                 // Jugador 1 selecciona sus cartas
-                seleccionarCartasIniciales(&jugador1, mazoJugador1, &numCartasRestantes);
+                seleccionarCartasIniciales(&jugador1, mazoCompleto, &numCartasRestantes);
 
                 printf("\n\nTurno del segundo jugador\n");
                 
-                // Crear mazo para el Jugador 2
-                struct Guardian mazoJugador2[Num_Cartas_A_Mostrar];
-                memcpy(mazoJugador2, mazoCompleto, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
-                revolverCartas(mazoJugador2, Num_Cartas_A_Mostrar);
-
-                // Jugador 2 selecciona sus cartas
-                seleccionarCartasIniciales(&jugador2, mazoJugador2, &numCartasRestantes);
+                // Jugador 2 selecciona sus cartas del mazo restante
+                seleccionarCartasIniciales(&jugador2, mazoCompleto, &numCartasRestantes);
                 break;
             case 2:
                 break;
@@ -97,13 +87,9 @@ void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas) {
     char linea[100];
     char *token;
 
-    // Leer la primera línea que contiene los encabezados y descartarla
     fgets(linea, sizeof(linea), archivo);
 
     while (fgets(linea, sizeof(linea), archivo) != NULL) {
-        // Eliminar el salto de línea al final de la línea leída
-        linea[strcspn(linea, "\n")] = '\0';
-
         token = strtok(linea, ",");
         strcpy(cartas[*numCartas].nombre, token);
         token = strtok(NULL, ",");
@@ -130,7 +116,7 @@ void mostrarMenu() {
 
 void revolverCartas(struct Guardian cartas[], int numCartas) {
     srand(time(NULL));
-    printf("Se están revolviendo las cartas....\n");
+    printf("Se estan revolviendo las cartas....\n");
     printf("....\n");
     printf("...\n");
     printf("..\n");
@@ -171,11 +157,23 @@ void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[],
 
             // Deja la carta seleccionada como ("--") en el lote
             lote[eleccion - 1].nombre[0] = '-';
-            lote[eleccion - 1].nombre[1] = '-';
+            lote[eleccion - 1].nombre[1] = 'S';
+            lote[eleccion - 1].nombre[2] = 'E';
+            lote[eleccion - 1].nombre[3] = 'L';
+            lote[eleccion - 1].nombre[4] = 'E';
+            lote[eleccion - 1].nombre[5] = 'C';
+            lote[eleccion - 1].nombre[6] = 'C';
+            lote[eleccion - 1].nombre[7] = 'I';
+            lote[eleccion - 1].nombre[8] = 'O';
+            lote[eleccion - 1].nombre[9] = 'N';
+            lote[eleccion - 1].nombre[10] = 'A';
+            lote[eleccion - 1].nombre[11] = 'D';
+            lote[eleccion - 1].nombre[12] = 'A';
+            lote[eleccion - 1].nombre[13] = '-';
             
             printf("Carta seleccionada.\n\n");
         } else {
-            printf("Selección no válida. Elige una carta válida del 1 al %d.\n", *numCartasEnLote);
+            printf("Selección no valida. Elige una carta válida del 1 al %d.\n", *numCartasEnLote);
         }
     }
 
@@ -185,8 +183,6 @@ void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[],
         printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador->mano[i].guardian.nombre, jugador->mano[i].guardian.tipo, jugador->mano[i].guardian.PV, jugador->mano[i].guardian.PA, jugador->mano[i].guardian.PD);
     }
 }
-
-
 
 
 
