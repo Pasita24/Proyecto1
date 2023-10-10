@@ -97,9 +97,13 @@ void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas) {
     char linea[100];
     char *token;
 
+    // Leer la primera línea que contiene los encabezados y descartarla
     fgets(linea, sizeof(linea), archivo);
 
     while (fgets(linea, sizeof(linea), archivo) != NULL) {
+        // Eliminar el salto de línea al final de la línea leída
+        linea[strcspn(linea, "\n")] = '\0';
+
         token = strtok(linea, ",");
         strcpy(cartas[*numCartas].nombre, token);
         token = strtok(NULL, ",");
@@ -126,7 +130,7 @@ void mostrarMenu() {
 
 void revolverCartas(struct Guardian cartas[], int numCartas) {
     srand(time(NULL));
-    printf("Se estan revolviendo las cartas....\n");
+    printf("Se están revolviendo las cartas....\n");
     printf("....\n");
     printf("...\n");
     printf("..\n");
@@ -167,23 +171,11 @@ void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[],
 
             // Deja la carta seleccionada como ("--") en el lote
             lote[eleccion - 1].nombre[0] = '-';
-            lote[eleccion - 1].nombre[1] = 'S';
-            lote[eleccion - 1].nombre[2] = 'E';
-            lote[eleccion - 1].nombre[3] = 'L';
-            lote[eleccion - 1].nombre[4] = 'E';
-            lote[eleccion - 1].nombre[5] = 'C';
-            lote[eleccion - 1].nombre[6] = 'C';
-            lote[eleccion - 1].nombre[7] = 'I';
-            lote[eleccion - 1].nombre[8] = 'O';
-            lote[eleccion - 1].nombre[9] = 'N';
-            lote[eleccion - 1].nombre[10] = 'A';
-            lote[eleccion - 1].nombre[11] = 'D';
-            lote[eleccion - 1].nombre[12] = 'A';
-            lote[eleccion - 1].nombre[13] = '-';
+            lote[eleccion - 1].nombre[1] = '-';
             
             printf("Carta seleccionada.\n\n");
         } else {
-            printf("Selección no valida. Elige una carta válida del 1 al %d.\n", *numCartasEnLote);
+            printf("Selección no válida. Elige una carta válida del 1 al %d.\n", *numCartasEnLote);
         }
     }
 
