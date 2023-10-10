@@ -51,20 +51,27 @@ int main() {
                 struct Jugador jugador1;
                 struct Jugador jugador2;
 
+                // Crear mazo completo
+                struct Guardian mazoCompleto[Max_Cartas];
+                memcpy(mazoCompleto, cartas, sizeof(struct Guardian) * Max_Cartas);
+                revolverCartas(mazoCompleto, Max_Cartas);
+
                 // Crear mazo para el Jugador 1
                 struct Guardian mazoJugador1[Num_Cartas_A_Mostrar];
-                memcpy(mazoJugador1, cartas, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
+                memcpy(mazoJugador1, mazoCompleto, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
                 revolverCartas(mazoJugador1, Num_Cartas_A_Mostrar);
 
-                // Crear mazo para el Jugador 2
-                struct Guardian mazoJugador2[Num_Cartas_A_Mostrar];
-                memcpy(mazoJugador2, cartas, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
-                revolverCartas(mazoJugador2, Num_Cartas_A_Mostrar);
-
+                // Jugador 1 selecciona sus cartas
                 seleccionarCartasIniciales(&jugador1, mazoJugador1, &numCartasRestantes);
-                
+
                 printf("\n\nTurno del segundo jugador\n");
                 
+                // Crear mazo para el Jugador 2
+                struct Guardian mazoJugador2[Num_Cartas_A_Mostrar];
+                memcpy(mazoJugador2, mazoCompleto, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
+                revolverCartas(mazoJugador2, Num_Cartas_A_Mostrar);
+
+                // Jugador 2 selecciona sus cartas
                 seleccionarCartasIniciales(&jugador2, mazoJugador2, &numCartasRestantes);
                 break;
             case 2:
@@ -186,6 +193,7 @@ void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[],
         printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador->mano[i].guardian.nombre, jugador->mano[i].guardian.tipo, jugador->mano[i].guardian.PV, jugador->mano[i].guardian.PA, jugador->mano[i].guardian.PD);
     }
 }
+
 
 
 
