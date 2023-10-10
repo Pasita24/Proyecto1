@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 #define Max_Cartas 60
 #define Num_Cartas_Iniciales 3
 #define Num_Cartas_A_Mostrar 15
-#define Num_Cartas_Restantes 12
 
 struct Guardian {
     char nombre[50];
@@ -24,19 +24,17 @@ struct Jugador {
     int puntosVida;
     struct Carta mano[Num_Cartas_Iniciales];
     int numCartasEnMano;
-    struct Guardian cartasRestantes[Num_Cartas_Restantes];
-    int numCartasRestantes;
 };
 
 void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas);
 void mostrarMenu();
 void revolverCartas(struct Guardian cartas[], int numCartas);
 void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[], int *numCartasEnLote);
-
-struct Guardian cartas[Max_Cartas];
-int numCartas = 0;
+void eliminarCartaDelLote(struct Guardian lote[], int *numCartasEnLote, int eleccion);
 
 int main() {
+    struct Guardian cartas[Max_Cartas];
+    int numCartas = 0;
     
     cargarCartasDesdeArchivo(cartas, &numCartas);
     revolverCartas(cartas, numCartas);
@@ -53,16 +51,21 @@ int main() {
                 struct Jugador jugador1;
                 struct Jugador jugador2;
 
-                // Copiar cartas al segundo jugador
-                struct Guardian cartasJugador2[Max_Cartas];
-                memcpy(cartasJugador2, cartas, sizeof(cartas));
-                revolverCartas(cartasJugador2, numCartas);
+                // Crear mazo para el Jugador 1
+                struct Guardian mazoJugador1[Num_Cartas_A_Mostrar];
+                memcpy(mazoJugador1, cartas, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
+                revolverCartas(mazoJugador1, Num_Cartas_A_Mostrar);
 
-                seleccionarCartasIniciales(&jugador1, cartas, &numCartasRestantes);
+                // Crear mazo para el Jugador 2
+                struct Guardian mazoJugador2[Num_Cartas_A_Mostrar];
+                memcpy(mazoJugador2, cartas, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
+                revolverCartas(mazoJugador2, Num_Cartas_A_Mostrar);
+
+                seleccionarCartasIniciales(&jugador1, mazoJugador1, &numCartasRestantes);
                 
                 printf("\n\nTurno del segundo jugador\n");
                 
-                seleccionarCartasIniciales(&jugador2, cartas, &numCartasRestantes);
+                seleccionarCartasIniciales(&jugador2, mazoJugador2, &numCartasRestantes);
                 break;
             case 2:
                 break;
@@ -139,28 +142,41 @@ void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[],
 
     while (jugador->numCartasEnMano < Num_Cartas_Iniciales && *numCartasEnLote > 0) {
         for (int i = 0; i < *numCartasEnLote && jugador->numCartasEnMano < Num_Cartas_Iniciales; i++) {
-            printf("%d. %s (%s, PV:%d, PA:%d, PD:%d)\n", i + 1, lote[i].nombre, lote[i].tipo, lote[i].PV, lote[i].PA, lote[i].PD);
+            if (lote[i].nombre[0] != '-' && lote[i].nombre[1] != '-') {
+                printf("%d. %s (%s, PV:%d, PA:%d, PD:%d)\n", i + 1, lote[i].nombre, lote[i].tipo, lote[i].PV, lote[i].PA, lote[i].PD);
+            } else {
+                printf("%d. --\n", i + 1);
+            }
         }
 
         printf("Elige una carta (1-%d): ", *numCartasEnLote);
         int eleccion;
         scanf("%d", &eleccion);
 
-        if (eleccion >= 1 && eleccion <= *numCartasEnLote) {
+        if (eleccion >= 1 && eleccion <= *numCartasEnLote && lote[eleccion - 1].nombre[0] != '-' && lote[eleccion - 1].nombre[1] != '-') {
             // Agrega la carta seleccionada a la mano del jugador
             jugador->mano[jugador->numCartasEnMano].guardian = lote[eleccion - 1];
             jugador->numCartasEnMano++;
 
-            // Elimina la carta seleccionada del lote
-            for (int i = eleccion - 1; i < *numCartasEnLote - 1; i++) {
-                lote[i] = lote[i + 1];
-            }
-            
-            (*numCartasEnLote)--;
+            // Deja la carta seleccionada como ("--") en el lote
+            lote[eleccion - 1].nombre[0] = '-';
+            lote[eleccion - 1].nombre[1] = 'S';
+            lote[eleccion - 1].nombre[2] = 'E';
+            lote[eleccion - 1].nombre[3] = 'L';
+            lote[eleccion - 1].nombre[4] = 'E';
+            lote[eleccion - 1].nombre[5] = 'C';
+            lote[eleccion - 1].nombre[6] = 'C';
+            lote[eleccion - 1].nombre[7] = 'I';
+            lote[eleccion - 1].nombre[8] = 'O';
+            lote[eleccion - 1].nombre[9] = 'N';
+            lote[eleccion - 1].nombre[10] = 'A';
+            lote[eleccion - 1].nombre[11] = 'D';
+            lote[eleccion - 1].nombre[12] = 'A';
+            lote[eleccion - 1].nombre[13] = '-';
             
             printf("Carta seleccionada.\n\n");
         } else {
-            printf("Selección no valida. Elige una carta del 1 al %d.\n", *numCartasEnLote);
+            printf("Selección no valida. Elige una carta válida del 1 al %d.\n", *numCartasEnLote);
         }
     }
 
@@ -170,5 +186,11 @@ void seleccionarCartasIniciales(struct Jugador *jugador, struct Guardian lote[],
         printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador->mano[i].guardian.nombre, jugador->mano[i].guardian.tipo, jugador->mano[i].guardian.PV, jugador->mano[i].guardian.PA, jugador->mano[i].guardian.PD);
     }
 }
+
+
+
+
+
+
 
 
