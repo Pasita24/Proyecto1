@@ -176,53 +176,60 @@ void mostrarCartasEnMano(struct Jugador jugador) {
 }
 
 void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2) {
-    int turno = 1; 
-    int cartaElegida;
+    int cartaElegida1, cartaElegida2;
 
-    while (1) {
-        printf("\n----- Turno del Jugador %d -----\n", turno);
+    printf("Turno de los jugadores para seleccionar cartas para el mazo de combate:\n");
 
-        if (turno == 1) {
-            printf("Cartas del Jugador 1:\n");
-            mostrarCartasEnMano(*jugador1);
-            printf("Elige una carta para poner en el campo de batalla (1-%d): ", jugador1->numCartasEnMano);
-            scanf("%d", &cartaElegida);
+    // Jugador 1 selecciona una carta
+    printf("Cartas del Jugador 1:\n");
+    mostrarCartasEnMano(*jugador1);
+    printf("Elige una carta para poner en el campo de batalla (1-%d): ", jugador1->numCartasEnMano);
+    scanf("%d", &cartaElegida1);
 
-            if (cartaElegida >= 1 && cartaElegida <= jugador1->numCartasEnMano) {
-                jugador1->campoBatalla[0] = jugador1->mano[cartaElegida - 1];
-                jugador1->campoBatalla[0].enCampoBatalla = 1;
+    if (cartaElegida1 >= 1 && cartaElegida1 <= jugador1->numCartasEnMano) {
+        jugador1->campoBatalla[0] = jugador1->mano[cartaElegida1 - 1];
+        jugador1->campoBatalla[0].enCampoBatalla = 1;
 
-                jugador1->mano[cartaElegida - 1].enCampoBatalla = 1;
-                jugador1->numCartasEnMano--;
-
-                // Mostrar la carta que está en combate y sus atributos
-                printf("La carta %s está en combate. Atributos: PV:%d, PA:%d, PD:%d\n", jugador1->campoBatalla[0].guardian.nombre, jugador1->campoBatalla[0].guardian.PV, jugador1->campoBatalla[0].guardian.PA, jugador1->campoBatalla[0].guardian.PD);
-            } else {
-                printf("Selección no válida. Elige una carta válida del 1 al %d.\n", jugador1->numCartasEnMano);
-                continue;
-            }
-        } else if (turno == 2) {
-            printf("Cartas del Jugador 2:\n");
-            mostrarCartasEnMano(*jugador2);
-            printf("Elige una carta para poner en el campo de batalla (1-%d): ", jugador2->numCartasEnMano);
-            scanf("%d", &cartaElegida);
-
-            if (cartaElegida >= 1 && cartaElegida <= jugador2->numCartasEnMano) {
-                jugador2->campoBatalla[0] = jugador2->mano[cartaElegida - 1];
-                jugador2->campoBatalla[0].enCampoBatalla = 1;
-
-                jugador2->mano[cartaElegida - 1].enCampoBatalla = 1;
-                jugador2->numCartasEnMano--;
-
-                printf("La carta %s está en combate. Atributos: PV:%d, PA:%d, PD:%d\n", jugador2->campoBatalla[0].guardian.nombre, jugador2->campoBatalla[0].guardian.PV, jugador2->campoBatalla[0].guardian.PA, jugador2->campoBatalla[0].guardian.PD);
-            } else {
-                printf("Selección no válida. Elige una carta válida del 1 al %d.\n", jugador2->numCartasEnMano);
-                continue;
-            }
+        for (int i = cartaElegida1 - 1; i < jugador1->numCartasEnMano - 1; i++) {
+            jugador1->mano[i] = jugador1->mano[i + 1];
         }
-        turno = 3 - turno;
+        jugador1->numCartasEnMano--;
+    } else {
+        printf("Selección no válida para el Jugador 1. Elige una carta válida del 1 al %d.\n", jugador1->numCartasEnMano);
     }
+
+    // Jugador 2 selecciona una carta
+    printf("Cartas del Jugador 2:\n");
+    mostrarCartasEnMano(*jugador2);
+    printf("Elige una carta para poner en el campo de batalla (1-%d): ", jugador2->numCartasEnMano);
+    scanf("%d", &cartaElegida2);
+
+    if (cartaElegida2 >= 1 && cartaElegida2 <= jugador2->numCartasEnMano) {
+        jugador2->campoBatalla[0] = jugador2->mano[cartaElegida2 - 1];
+        jugador2->campoBatalla[0].enCampoBatalla = 1;
+
+        for (int i = cartaElegida2 - 1; i < jugador2->numCartasEnMano - 1; i++) {
+            jugador2->mano[i] = jugador2->mano[i + 1];
+        }
+        jugador2->numCartasEnMano--;
+    } else {
+        printf("Selección no válida para el Jugador 2. Elige una carta válida del 1 al %d.\n", jugador2->numCartasEnMano);
+    }
+
+    // Mostrar el contenido del mazo de combate
+    printf("\nMazo de Combate del Jugador 1:\n");
+    printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador1->campoBatalla[0].guardian.nombre,
+           jugador1->campoBatalla[0].guardian.tipo, jugador1->campoBatalla[0].guardian.PV,
+           jugador1->campoBatalla[0].guardian.PA, jugador1->campoBatalla[0].guardian.PD);
+
+    printf("\nMazo de Combate del Jugador 2:\n");
+    printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador2->campoBatalla[0].guardian.nombre,
+           jugador2->campoBatalla[0].guardian.tipo, jugador2->campoBatalla[0].guardian.PV,
+           jugador2->campoBatalla[0].guardian.PA, jugador2->campoBatalla[0].guardian.PD);
+
+    // No se necesita un bucle, ya que los jugadores eligen sus cartas de una vez.
 }
+
 
 
 
