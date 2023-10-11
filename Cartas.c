@@ -188,7 +188,3 @@ void mostrarCartasEnMano(struct Jugador jugador) {
 }
 
 
-
-
-
-
