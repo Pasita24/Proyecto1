@@ -253,24 +253,25 @@ void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2) {
         printf("Seleccion no valida para el Jugador 2. Elige una carta valida del 1 al %d.\n", jugador2->numCartasEnMano);
     }
 
+    printf("--------------EN COMBATE--------------\n");
     // Mostrar el contenido del mazo de combate
-    printf("\nMazo de Combate del Jugador 1:\n");
+    printf("Mazo de Combate del Jugador 1:\n");
     printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador1->campoBatalla[0].guardian.nombre,
            jugador1->campoBatalla[0].guardian.tipo, jugador1->campoBatalla[0].guardian.PV,
            jugador1->campoBatalla[0].guardian.PA, jugador1->campoBatalla[0].guardian.PD);
-    printf("\n");
     printf("\nMazo de Combate del Jugador 2:\n");
     printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador2->campoBatalla[0].guardian.nombre,
            jugador2->campoBatalla[0].guardian.tipo, jugador2->campoBatalla[0].guardian.PV,
            jugador2->campoBatalla[0].guardian.PA, jugador2->campoBatalla[0].guardian.PD);
 
-   
+    printf("---------------------------------------\n");
    /*mostrarMazoCartasElegidas(*jugador1);
     mostrarMazoCartasElegidas(*jugador2);*/ // Mostrar el mazo de cartas elegidas
     
 
     int opcion;
     do {
+        printf("Turno del Jugador %d\n", turno);
         // Mostrar menú para que los jugadores puedan seleccionar su acción
         printf("---- Menu de Combate ----\n");
         printf("1. Atacar a oponente\n");
