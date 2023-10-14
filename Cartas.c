@@ -36,7 +36,7 @@ void mostrarCartasEnMano(struct Jugador jugador);
 void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2);
 void seleccionarCartaCampoBatalla(struct Jugador *jugador);
 void atacarOponente(struct Jugador *atacante, struct Jugador *oponente, struct Jugador *jugador1, struct Jugador *jugador2);
-
+void moverCartaDeMazoAMano(struct Jugador *jugador);
 
 int main() {
     struct Guardian cartas[Max_Cartas];
@@ -56,6 +56,9 @@ int main() {
                 struct Jugador jugador1;
                 struct Jugador jugador2;
 
+                jugador1.puntosVida =5;
+                jugador2.puntosVida =5;
+
                 // Copiar las cartas al mazo propio de cada jugador
                 memcpy(jugador1.mazoPropio, cartas, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
                 memcpy(jugador2.mazoPropio, cartas, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
@@ -69,11 +72,15 @@ int main() {
 
                 // Jugadores seleccionan sus cartas iniciales
                 seleccionarCartasIniciales(&jugador1, Num_Cartas_A_Mostrar);
+                printf("\n");
                 seleccionarCartasIniciales(&jugador2, Num_Cartas_A_Mostrar);
 
                 printf("\n\n");
                 // Iniciar el combate
+                printf("----------------Empieza el juego-----------------\n");
                 iniciarCombate(&jugador1, &jugador2);
+                moverCartaDeMazoAMano(&jugador1);
+                moverCartaDeMazoAMano(&jugador2);
                 break;
             case 2:
                 break;
@@ -175,7 +182,7 @@ void seleccionarCartasIniciales(struct Jugador *jugador, int numCartasRestantes)
 
 void mostrarCartasEnMano(struct Jugador jugador) {
     for (int i = 0; i < Num_Cartas_Iniciales; i++) {
-        printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador.mano[i].guardian.nombre, jugador.mano[i].guardian.tipo, jugador.mano[i].guardian.PV, jugador.mano[i].guardian.PA, jugador.mano[i].guardian.PD);
+        printf("%d) %s (%s, PV:%d, PA:%d, PD:%d)\n", i+1,jugador.mano[i].guardian.nombre, jugador.mano[i].guardian.tipo, jugador.mano[i].guardian.PV, jugador.mano[i].guardian.PA, jugador.mano[i].guardian.PD);
     }
 }
 void mostrarMazoCartasElegidas(struct Jugador jugador) {
@@ -205,7 +212,9 @@ void agregarPrimeraCartaMazoElegidas(struct Jugador *jugador) {
 void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2) {
     int cartaElegida1, cartaElegida2;
 
-    printf("Turno de los jugadores para seleccionar cartas para el mazo de combate:\n");
+    int turno = 1; // Variable para llevar el seguimiento del turno
+    do{
+        printf("Turno de los jugadores para seleccionar cartas para el mazo de combate:\n");
 
     // Jugador 1 selecciona una carta
     printf("Cartas del Jugador 1:\n");
@@ -225,6 +234,7 @@ void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2) {
         printf("Seleccion no válida para el Jugador 1. Elige una carta valida del 1 al %d.\n", jugador1->numCartasEnMano);
     }
 
+    printf("\n");
     // Jugador 2 selecciona una carta
     printf("Cartas del Jugador 2:\n");
     mostrarCartasEnMano(*jugador2);
@@ -248,44 +258,46 @@ void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2) {
     printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador1->campoBatalla[0].guardian.nombre,
            jugador1->campoBatalla[0].guardian.tipo, jugador1->campoBatalla[0].guardian.PV,
            jugador1->campoBatalla[0].guardian.PA, jugador1->campoBatalla[0].guardian.PD);
-
+    printf("\n");
     printf("\nMazo de Combate del Jugador 2:\n");
     printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", jugador2->campoBatalla[0].guardian.nombre,
            jugador2->campoBatalla[0].guardian.tipo, jugador2->campoBatalla[0].guardian.PV,
            jugador2->campoBatalla[0].guardian.PA, jugador2->campoBatalla[0].guardian.PD);
 
-    // Mostrar el mazo de cartas elegidas
-    mostrarMazoCartasElegidas(*jugador1);
-    mostrarMazoCartasElegidas(*jugador2);
+   
+   /*mostrarMazoCartasElegidas(*jugador1);
+    mostrarMazoCartasElegidas(*jugador2);*/ // Mostrar el mazo de cartas elegidas
+    
 
     int opcion;
     do {
         // Mostrar menú para que los jugadores puedan seleccionar su acción
         printf("---- Menu de Combate ----\n");
-        printf("Jugador 1 (%s) - PV:%d\n", jugador1->campoBatalla[0].guardian.nombre, jugador1->puntosVida);
-        printf("Jugador 2 (%s) - PV:%d\n", jugador2->campoBatalla[0].guardian.nombre, jugador2->puntosVida);
         printf("1. Atacar a oponente\n");
         printf("2. Pasar turno\n");
-        printf("Selecciona una opción: ");
+        printf("Selecciona una opcion: ");
         scanf("%d", &opcion);
 
         switch (opcion) {
             case 1:
                 // Los jugadores pueden atacar al oponente
-                if (jugador1->campoBatalla[0].enCampoBatalla && jugador2->campoBatalla[0].enCampoBatalla) {
+                if (turno==1) {
                     // Jugador 1 ataca a Jugador 2
-                    atacarOponente(jugador1, jugador2, jugador1, jugador2);
+                    atacarOponente(jugador1, jugador2,jugador1,jugador1);
                 } else {
-                    printf("No puedes atacar sin cartas en el campo de batalla.\n");
+                    atacarOponente(jugador2, jugador1, jugador1, jugador2);
                 }
                 break;
             case 2:
-                // Pasar turno
+                    printf("PASANDO DE TURNO\n");
                 break;
             default:
                 printf("Opcion no valida. Elige una opción valida.\n");
         }
     } while (opcion != 2);
+    // Cambiar el turno después de cada turno
+        turno = (turno == 1) ? 2 : 1;
+    }while(jugador1->puntosVida>0 && jugador2->puntosVida >0);
 }
 
 void seleccionarCartaCampoBatalla(struct Jugador *jugador) {
@@ -307,41 +319,66 @@ void seleccionarCartaCampoBatalla(struct Jugador *jugador) {
     }
 }
 
+// Función para que un jugador ataque al oponente seleccionando una carta
 void atacarOponente(struct Jugador *atacante, struct Jugador *oponente, struct Jugador *jugador1, struct Jugador *jugador2) {
-    int cartaElegida;
-
     if (atacante->campoBatalla[0].enCampoBatalla) {
         printf("Carta en el campo de batalla del Jugador %d:\n", atacante == jugador1 ? 1 : 2);
         printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", atacante->campoBatalla[0].guardian.nombre,
                atacante->campoBatalla[0].guardian.tipo, atacante->campoBatalla[0].guardian.PV,
                atacante->campoBatalla[0].guardian.PA, atacante->campoBatalla[0].guardian.PD);
+
+        if (oponente->campoBatalla[0].enCampoBatalla) {
+            printf("Carta en el campo de batalla del Jugador %d:\n", oponente == jugador1 ? 1 : 2);
+            printf("%s (%s, PV:%d, PA:%d, PD:%d)\n", oponente->campoBatalla[0].guardian.nombre,
+                   oponente->campoBatalla[0].guardian.tipo, oponente->campoBatalla[0].guardian.PV,
+                   oponente->campoBatalla[0].guardian.PA, oponente->campoBatalla[0].guardian.PD);
+
+            printf("Elige una carta para atacar a tu oponente (1): ");
+            int cartaElegida;
+            scanf("%d", &cartaElegida);
+
+            if (cartaElegida == 1) {
+                // Calcular el daño realizado por el atacante
+                int danio = atacante->campoBatalla[0].guardian.PA - oponente->campoBatalla[0].guardian.PD;
+                if (danio > 0) {
+                    // Restar puntos de vida al oponente
+                    oponente->puntosVida -= danio;
+                    printf("El ataque ha infligido %d puntos de daño al oponente.\n", danio);
+
+                    // Verificar si el oponente ha sido derrotado
+                    if (oponente->puntosVida <= 0) {
+                        printf("El Jugador %d ha sido derrotado.\n", oponente == jugador1 ? 1 : 2);
+                    }
+                } else {
+                    printf("El ataque no infligió daño al oponente debido a la alta defensa del oponente.\n");
+                }
+            } else {
+                printf("Selección no válida. Elige la carta 1 para atacar.\n");
+            }
+        } else {
+            printf("No hay cartas en el campo de batalla del Jugador %d.\n", oponente == jugador1 ? 1 : 2);
+        }
     } else {
         printf("No hay cartas en el campo de batalla del Jugador %d.\n", atacante == jugador1 ? 1 : 2);
-        return;
-    }
-
-    printf("Cartas en el campo de batalla del Jugador %d:\n", oponente == jugador1 ? 1 : 2);
-    for (int i = 0; i < oponente->numCartasEnMano; i++) {
-        printf("%d. %s (%s, PV:%d, PA:%d, PD:%d)\n", i + 1, oponente->campoBatalla[i].guardian.nombre,
-               oponente->campoBatalla[i].guardian.tipo, oponente->campoBatalla[i].guardian.PV,
-               oponente->campoBatalla[i].guardian.PA, oponente->campoBatalla[i].guardian.PD);
-    }
-
-    printf("Elige una carta para atacar a tu oponente (1-%d): ", oponente->numCartasEnMano);
-    scanf("%d", &cartaElegida);
-
-    if (cartaElegida >= 1 && cartaElegida <= oponente->numCartasEnMano) {
-        // Realizar el ataque (implementación del ataque según las reglas del juego)
-        // Restar puntos de vida, considerar el poder de ataque (PA) y el poder de defensa (PD).
-        // Luego, actualiza el estado de las cartas, por ejemplo, marcándolas como destruidas si es necesario.
-
-        printf("Ataque realizado.\n");
-    } else {
-        printf("Selección no valida. Elige una carta valida del 1 al %d.\n", oponente->numCartasEnMano);
     }
 }
+void moverCartaDeMazoAMano(struct Jugador *jugador) {
+    // Verificar si hay cartas restantes en el mazo propio
+    if (jugador->numCartasEnMano > 0) {
+        // Crear una instancia de Carta y asignar el Guardian
+        struct Carta nuevaCarta;
+        nuevaCarta.guardian = jugador->mazoPropio[0];
 
+        // Agregar la nueva Carta a la mano
+        jugador->mano[jugador->numCartasEnMano] = nuevaCarta;
+        jugador->numCartasEnMano++;
 
-
-
-
+        // Eliminar el primer guardián del mazo propio y desplazar los demás
+        for (int i = 0; i < jugador->numCartasEnMano - 1; i++) {
+            jugador->mazoPropio[i] = jugador->mazoPropio[i + 1];
+        }
+        jugador->numCartasEnMano--;
+    } else {
+        printf("No quedan mas cartas en el mazo propio.\n");
+    }
+}
