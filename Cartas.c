@@ -396,7 +396,7 @@ void seleccionarCartaCampoBatalla(struct Jugador *jugador) {
 
             printf("Carta seleccionada y dejada en el campo de batalla.\n");
         } else {
-            printf("Selección no válida. Elige una carta válida del 1 al %d.\n", jugador->numCartasEnMano);
+            printf("Selección no valida. Elige una carta valida del 1 al %d.\n", jugador->numCartasEnMano);
         }
     } else {
         printf("No tienes cartas en la mano para seleccionar.\n");
@@ -446,7 +446,7 @@ void atacarOponente(struct Jugador *atacante, struct Jugador *oponente, struct J
                     printf("El ataque no hizo efecto ya que la defensa es mayor que el ataque.\n");
                 }
             } else {
-                printf("Selección no valida. Elige la carta 1 para atacar.\n");
+                printf("Seleccion no valida. Elige la carta 1 para atacar.\n");
             }
         } else {
             printf("No hay cartas en el campo de batalla del Jugador %d.\n", oponente == jugador1 ? 1 : 2);
