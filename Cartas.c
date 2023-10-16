@@ -6,6 +6,7 @@
 #define Max_Cartas 60
 #define Num_Cartas_Iniciales 3
 #define Num_Cartas_A_Mostrar 15
+#define Max_Guardianes_Creados 5
 
 struct Guardian {
     char nombre[50];
@@ -21,13 +22,18 @@ struct Carta {
 };
 
 struct Jugador {
-    int puntosVida ;
+    int puntosVida;
     struct Carta mano[Num_Cartas_Iniciales];
     int numCartasEnMano;
     struct Guardian mazoPropio[Num_Cartas_A_Mostrar];
     struct Carta campoBatalla[Max_Cartas];
 };
 
+struct JugadorCreador {
+    int numGuardianesCreados;
+    struct Guardian guardianCreado[Max_Guardianes_Creados];
+};
+int guardianAgregadoPorTurno = 0;
 void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas);
 void mostrarMenu();
 void revolverCartas(struct Guardian cartas[], int numCartas);
@@ -37,6 +43,8 @@ void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2);
 void seleccionarCartaCampoBatalla(struct Jugador *jugador);
 void atacarOponente(struct Jugador *atacante, struct Jugador *oponente, struct Jugador *jugador1, struct Jugador *jugador2);
 void moverCartaDeMazoAMano(struct Jugador *jugador);
+void crearGuardian(struct JugadorCreador *jugadorCreador);
+void mostrarGuardianesCreados(struct JugadorCreador jugadorCreador);
 
 int main() {
     struct Guardian cartas[Max_Cartas];
@@ -46,18 +54,22 @@ int main() {
     revolverCartas(cartas, numCartas);
 
     int opcion;
+    struct JugadorCreador jugadorCreador;
+    jugadorCreador.numGuardianesCreados = 0;
+
     do {
         mostrarMenu();
         printf("Selecciona una opcion: \n");
         scanf("%d", &opcion);
+
         switch (opcion) {
             case 1:
                 // Implementar inicio del juego
                 struct Jugador jugador1;
                 struct Jugador jugador2;
 
-                jugador1.puntosVida = 5;
-                jugador2.puntosVida = 5;
+                jugador1.puntosVida = 3;
+                jugador2.puntosVida = 3;
 
                 // Copiar las cartas al mazo propio de cada jugador
                 memcpy(jugador1.mazoPropio, cartas, sizeof(struct Guardian) * Num_Cartas_A_Mostrar);
@@ -69,7 +81,7 @@ int main() {
                 // Inicializar el número de cartas en mano
                 jugador1.numCartasEnMano = 0;
                 jugador2.numCartasEnMano = 0;
-            
+
                 // Jugadores seleccionan sus cartas iniciales
                 seleccionarCartasIniciales(&jugador1, Num_Cartas_A_Mostrar);
                 printf("\n");
@@ -79,22 +91,24 @@ int main() {
                 // Iniciar el combate
                 printf("----------------Empieza el juego-----------------\n");
                 iniciarCombate(&jugador1, &jugador2);
-                moverCartaDeMazoAMano(&jugador1);
-                moverCartaDeMazoAMano(&jugador2);
                 break;
             case 2:
+                mostrarGuardianesCreados(jugadorCreador);
                 break;
             case 3:
+                crearGuardian(&jugadorCreador);
+                break;
+            case 4:
                 printf("Saliendo del juego...\n");
                 break;
             default:
                 printf("Opcion no valida. Intente de nuevo.\n");
         }
-    } while (opcion != 3);
+    } while (opcion != 4);
 
     return 0;
 }
-
+//<---------------------- Funcion para leer los guardianes------------------------------>
 void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas) {
     FILE *archivo = fopen("Cartas.txt", "r");
     if (archivo == NULL) {
@@ -120,14 +134,17 @@ void cargarCartasDesdeArchivo(struct Guardian cartas[], int *numCartas) {
 
     fclose(archivo);
 }
-
+//<------------------------------ Fin de funcion para leer los guardianes------------------------------------>
+//<------------Funcion mostrar menu principal------------->
 void mostrarMenu() {
     printf("---- The Clash of the Guardians ----\n");
     printf("1. Comenzar juego\n");
     printf("2. Historial de la partida\n");
-    printf("3. Salir\n");
+    printf("3. Crear Nuevo guardian\n");
+    printf("4. Salir del juego\n");
 }
-
+//<----------------Fin de funcion mostrar menu principal ------------------>
+//<-------------- Funcion para revolver las Guardianes -------------------------------->
 void revolverCartas(struct Guardian cartas[], int numCartas) {
     srand(time(NULL));
     printf("Se estan revolviendo las cartas....\n");
@@ -146,7 +163,8 @@ void revolverCartas(struct Guardian cartas[], int numCartas) {
         cartas[j] = temp;
     }
 }
-
+// <--------------------------FIN  de funcion para mezclar los guardianes---------------->
+//<------------------- Funcion para poder seleccionar las cartas inciales------------------------->
 void seleccionarCartasIniciales(struct Jugador *jugador, int numCartasRestantes) {
     printf("Selecciona tus 3 cartas iniciales:\n");
 
@@ -179,7 +197,68 @@ void seleccionarCartasIniciales(struct Jugador *jugador, int numCartasRestantes)
     printf("\n\nTus cartas iniciales son:\n");
     mostrarCartasEnMano(*jugador);
 }
+//<-------------------------------FIN Funcion para poder seleccionar las cartas inciales-------------------------->
+//<----------------------Funcion para crear Guardian -------------------------->
+void crearGuardian(struct JugadorCreador *jugadorCreador) {
+    if (jugadorCreador->numGuardianesCreados >= Max_Guardianes_Creados) {
+        printf("Has alcanzado el limite de guardianes creados (%d).\n", Max_Guardianes_Creados);
+        return;
+    }
 
+    printf("Creacion de un nuevo guardian:\n");
+    struct Guardian nuevoGuardian;
+
+    printf("Nombre: ");
+    scanf("%s", nuevoGuardian.nombre);
+
+    printf("Selecciona el tipo de guardian:\n");
+    printf("1. Mago\n");
+    printf("2. Vikingo\n");
+    printf("3. Nigromante\n");
+    printf("4. Bestia\n");
+    int tipoSeleccionado;
+    scanf("%d", &tipoSeleccionado);
+
+    switch (tipoSeleccionado) {
+        case 1:
+            strcpy(nuevoGuardian.tipo, "Mago");
+            break;
+        case 2:
+            strcpy(nuevoGuardian.tipo, "Vikingo");
+            break;
+        case 3:
+            strcpy(nuevoGuardian.tipo, "Nigromante");
+            break;
+        case 4:
+            strcpy(nuevoGuardian.tipo, "Bestia");
+            break;
+        default:
+            printf("Tipo no valido. Selecciona un tipo valido (1-4).\n");
+            return;
+    }
+
+    printf("Asigna puntos (total de 1000) a los atributos:\n");
+    printf("Puntos de Ataque (PA): ");
+    scanf("%d", &nuevoGuardian.PA);
+
+    printf("Puntos de Defensa (PD): ");
+    scanf("%d", &nuevoGuardian.PD);
+
+    printf("Puntos de Vida (PV): ");
+    scanf("%d", &nuevoGuardian.PV);
+
+    if (nuevoGuardian.PA + nuevoGuardian.PD + nuevoGuardian.PV != 1000) {
+        printf("La suma de los puntos de atributos debe ser 1000. No se ha creado el guardian.\n");
+        return;
+    }
+
+    jugadorCreador->guardianCreado[jugadorCreador->numGuardianesCreados] = nuevoGuardian;
+    jugadorCreador->numGuardianesCreados++;
+
+    printf("Guardian creado y agregado a tu lista de guardianes creados.\n");
+}
+//<----------------------------------- FIN de Funcion para crear Guardian ------------------------------------------>
+//<------------------------------Funciones para mostrar cartas de distintos mazos------------------------------->
 void mostrarCartasEnMano(struct Jugador jugador) {
     for (int i = 0; i < Num_Cartas_Iniciales; i++) {
         printf("%d) %s (%s, PV:%d, PA:%d, PD:%d)\n", i+1,jugador.mano[i].guardian.nombre, jugador.mano[i].guardian.tipo, jugador.mano[i].guardian.PV, jugador.mano[i].guardian.PA, jugador.mano[i].guardian.PD);
@@ -193,6 +272,19 @@ void mostrarCartasElegidas(struct Jugador jugador) {
                jugador.campoBatalla[i].guardian.PA, jugador.campoBatalla[i].guardian.PD);
     }
 }
+void mostrarGuardianesCreados(struct JugadorCreador jugadorCreador) {
+    printf("Guardianes creados por el Jugador:\n");
+    for (int i = 0; i < jugadorCreador.numGuardianesCreados; i++) {
+        printf("Guardián %d:\n", i + 1);
+        printf("Nombre: %s\n", jugadorCreador.guardianCreado[i].nombre);
+        printf("Tipo: %s\n", jugadorCreador.guardianCreado[i].tipo);
+        printf("Puntos de Vida (PV): %d\n", jugadorCreador.guardianCreado[i].PV);
+        printf("Puntos de Ataque (PA): %d\n", jugadorCreador.guardianCreado[i].PA);
+        printf("Puntos de Defensa (PD): %d\n", jugadorCreador.guardianCreado[i].PD);
+    }
+}
+//<-------------------------- FIN DE FUNCIONES PARA MOSTRAR CARTAS ------------------------------>
+//<---------------------------------Funcion Agregar cartas ------------------------------->
 void agregarPrimeraCartaMazoElegidas(struct Jugador *jugador) {
     // Verificar si hay cartas restantes en el mazo propio
     if (jugador->numCartasEnMano > 0) {
@@ -209,9 +301,11 @@ void agregarPrimeraCartaMazoElegidas(struct Jugador *jugador) {
         printf("No quedan mas cartas en el mazo propio.\n");
     }
 }
+//<-----------------------------FIN de funcion para agregar cartas--------------------------->
+//<---------------------------Funcion Principal para el combate--------------------------------->
 void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2) {
     int turno = 1; // Variable para llevar el seguimiento del turno
-
+    struct Jugador *jugadorEnTurno = jugador1;
     // Mostrar cartas iniciales en mano al comienzo del combate
     /*printf("Cartas iniciales del Jugador 1:\n");
     mostrarCartasEnMano(*jugador1);
@@ -220,50 +314,52 @@ void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2) {
 
     // Permitir a ambos jugadores seleccionar la primera carta en el campo de batalla
     printf("------------JUGADOR 1----------\n");
-    printf("Selecciona tu primera carta en el campo de batalla:\n");
+    printf("Selecciona tu PRIMERA para dejarlo en el campo de batalla:\n");
     seleccionarCartaCampoBatalla(jugador1);
     printf("------------JUGADOR 2----------\n");
-    printf("Selecciona tu primera carta en el campo de batalla:\n");
+    printf("Selecciona tu PRIMERA para dejarlo en el campo de batalla:\n");
     seleccionarCartaCampoBatalla(jugador2);
 
-    do {
+   while (jugador1->puntosVida > 0 && jugador2->puntosVida > 0) {
         printf("--------------GUARIDANES ELEGIDOS--------------\n");
 
-        // Mostrar las cartas en mano en el inicio de cada turno
+        // Mostrar las cartas en mano al inicio de cada turno
         printf("Cartas en mano del Jugador %d:\n", turno);
         mostrarCartasEnMano(turno == 1 ? *jugador1 : *jugador2);
         printf("-------------------------------------------\n");
-        int opcion;
-        do {
-            printf("<---Turno del Jugador %d--->\n", turno);
-            printf("---- Menu de Combate ----\n");
-            printf("1. Atacar al oponente\n");
-            printf("2. Seleccionar una carta y dejarla en el campo de batalla\n");
-            printf("3. Opciones de guardianes disponibles\n");
-            printf("Selecciona una opcion: ");
-            scanf("%d", &opcion);
 
-            switch (opcion) {
-                case 1:
-                    atacarOponente(turno == 1 ? jugador1 : jugador2, turno == 1 ? jugador2 : jugador1, jugador1, jugador2);
-                    break;
-                case 2:
-                    seleccionarCartaCampoBatalla(turno == 1 ? jugador1 : jugador2);
-                    break;
-                case 3:
-                    printf("Mostrando las cartas elegidas del Jugador %d:\n", turno);
-                    printf("------------------------------\n");
-                    mostrarCartasElegidas(turno == 1 ? *jugador1 : *jugador2);
-                    printf("------------------------------\n");
-                    break;
-                default:
-                    printf("Opcion no valida. Elige una opción valida.\n");
-            }
-        } while (opcion != 3);
-
+        // Cambiar el turno antes de que el jugador realice una acción
         turno = (turno == 1) ? 2 : 1;
 
-    } while (jugador1->puntosVida > 0 && jugador2->puntosVida > 0);
+
+        int opcion;
+        printf("<---Turno del Jugador %d--->\n", turno);
+        printf("Vida del jugador: %d\n", jugadorEnTurno->puntosVida);
+        printf("---- Menu de Combate ----\n");
+        printf("1. Atacar al oponente\n");
+        printf("2. Seleccionar una carta y dejarla en el campo de batalla\n");
+        printf("3. Mostrar guardianes disponibles\n");
+        printf("Selecciona una opcion: ");
+        scanf("%d", &opcion);
+
+        switch (opcion) {
+            case 1:
+                atacarOponente(turno == 1 ? jugador1 : jugador2, turno == 1 ? jugador2 : jugador1, jugador1, jugador2);
+                break;
+            case 2:
+                seleccionarCartaCampoBatalla(turno == 1 ? jugador1 : jugador2);
+                break;
+            case 3:
+                printf("Mostrando las cartas elegidas del Jugador %d:\n", turno);
+                printf("------------------------------\n");
+                mostrarCartasElegidas(turno == 1 ? *jugador1 : *jugador2);
+                printf("------------------------------\n");
+                break;
+            default:
+                printf("Opcion no valida. Elige una opción valida.\n");
+        }
+    }
+
     // Verificar quién ha ganado al final del combate
     if (jugador1->puntosVida <= 0) {
         printf("El Jugador 2 ha ganado el juego.\n");
@@ -271,32 +367,46 @@ void iniciarCombate(struct Jugador *jugador1, struct Jugador *jugador2) {
         printf("El Jugador 1 ha ganado el juego.\n");
     }
 }
+//<----------------------------Fin de la funcion de combate------------------------------->
+//<----------------------- Funcion para seleccionar los guardianes que van a luchar------------------------>
 void seleccionarCartaCampoBatalla(struct Jugador *jugador) {
-    int cartaElegida;
-
-    printf("Cartas en mano del Jugador:\n");
-    mostrarCartasEnMano(*jugador);
-    printf("Elige una carta para dejarla en el campo de batalla (1-%d): ", jugador->numCartasEnMano);
-    scanf("%d", &cartaElegida);
-
-    if (cartaElegida >= 1 && cartaElegida <= jugador->numCartasEnMano) {
-        // Copia la carta seleccionada al campo de batalla
-        jugador->campoBatalla[0] = jugador->mano[cartaElegida - 1];
-        jugador->campoBatalla[0].enCampoBatalla = 1;
-        // Desplaza las cartas restantes en la mano
-        for (int i = cartaElegida - 1; i < jugador->numCartasEnMano - 1; i++) {
-            jugador->mano[i] = jugador->mano[i + 1];
+    if (jugador->numCartasEnMano > 0) {
+        // Mostrar las cartas disponibles en el mazo de cartas elegidas
+        printf("Cartas en el mazo de cartas elegidas:\n");
+        for (int i = 0; i < jugador->numCartasEnMano; i++) {
+            printf("%d. %s (%s, PV:%d, PA:%d, PD:%d)\n", i + 1, jugador->mano[i].guardian.nombre,
+                   jugador->mano[i].guardian.tipo, jugador->mano[i].guardian.PV,
+                   jugador->mano[i].guardian.PA, jugador->mano[i].guardian.PD);
         }
-        jugador->numCartasEnMano--;
 
-        printf("Carta seleccionada y dejada en el campo de batalla.\n");
+        int cartaElegida;
+        printf("Elige una carta para dejarla en el campo de batalla (1-%d): ", jugador->numCartasEnMano);
+        scanf("%d", &cartaElegida);
+
+        if (cartaElegida >= 1 && cartaElegida <= jugador->numCartasEnMano) {
+            // Copia la carta seleccionada al campo de batalla
+            jugador->campoBatalla[0] = jugador->mano[cartaElegida - 1];
+            jugador->campoBatalla[0].enCampoBatalla = 1;
+
+            // Elimina la carta seleccionada de la mano y desplaza las demás
+            for (int i = cartaElegida - 1; i < jugador->numCartasEnMano - 1; i++) {
+                jugador->mano[i] = jugador->mano[i + 1];
+            }
+            jugador->numCartasEnMano--;
+
+            printf("Carta seleccionada y dejada en el campo de batalla.\n");
+        } else {
+            printf("Selección no válida. Elige una carta válida del 1 al %d.\n", jugador->numCartasEnMano);
+        }
     } else {
-        printf("Selección no valida. Elige una carta valida del 1 al %d.\n", jugador->numCartasEnMano);
+        printf("No tienes cartas en la mano para seleccionar.\n");
     }
 }
+//----------------------------- FIN de funcion para seleccionar cartas de combate---------------------------------------->
 // Función para que un jugador ataque al oponente seleccionando una carta
 void atacarOponente(struct Jugador *atacante, struct Jugador *oponente, struct Jugador *jugador1, struct Jugador *jugador2) {
     if (atacante->campoBatalla[0].enCampoBatalla) {
+        printf("\n");
         printf("---TUS GUARDIANES---\n");
         printf("Carta en el campo de batalla del Jugador %d:\n", atacante == jugador1 ? 1 : 2);
         printf("%s (%s, PV:%d, PA:%d, PD:%d)\t\t", atacante->campoBatalla[0].guardian.nombre,
@@ -317,16 +427,20 @@ void atacarOponente(struct Jugador *atacante, struct Jugador *oponente, struct J
             scanf("%d", &cartaElegida);
 
             if (cartaElegida == 1) {
-                // Calcula el daño realizado por el atacante y resta puntos de vida al oponente
+                // Calcula el daño realizado por el atacante
                 int danio = atacante->campoBatalla[0].guardian.PA - oponente->campoBatalla[0].guardian.PD;
                 if (danio > 0) {
                     // Restar puntos de vida al oponente
-                    oponente->puntosVida -= danio;
-                    printf("El ataque ha infligido %d puntos de vida al oponente.\n", danio);
-
-                    // Verificar si el oponente ha sido derrotado
-                    if (oponente->puntosVida <= 0) {
-                        printf("El Jugador %d ha sido derrotado.\n", oponente == jugador1 ? 1 : 2);
+                    oponente->campoBatalla[0].guardian.PV -= danio;
+                    if (oponente->campoBatalla[0].guardian.PV <= 0) {
+                        // Si los puntos de vida del oponente llegan a cero o menos, retira al oponente del campo de batalla
+                        printf("El ataque ha derrotado al oponente.\n");
+                        oponente->campoBatalla[0].enCampoBatalla = 0;
+                        
+                        // Restar un punto de vida al jugador oponente
+                        oponente->puntosVida--;
+                    } else {
+                        printf("El ataque ha infligido %d puntos de vida al oponente.\n", danio);
                     }
                 } else {
                     printf("El ataque no hizo efecto ya que la defensa es mayor que el ataque.\n");
@@ -341,6 +455,7 @@ void atacarOponente(struct Jugador *atacante, struct Jugador *oponente, struct J
         printf("No hay cartas en el campo de batalla del Jugador %d.\n", atacante == jugador1 ? 1 : 2);
     }
 }
+//<----------------- Funcion para mover automaticamente los guardianes ---------------------->
 void moverCartaDeMazoAMano(struct Jugador *jugador) {
     // Verificar si hay cartas restantes en el mazo propio
     if (jugador->numCartasEnMano > 0) {
